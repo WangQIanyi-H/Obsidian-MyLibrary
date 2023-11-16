@@ -9,4 +9,6 @@ Permanent Notes
 建立两者关联
 
 Permanent Notes 规则
-- 
+- 只包含一个核心思想
+- 预设读者是小白
+- 链接其他笔记
