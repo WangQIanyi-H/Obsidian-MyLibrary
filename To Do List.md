@@ -1,14 +1,16 @@
 ### 今日待办
 ```tasks
 due today
+sort by status
+sort by priority
 ```
 
 ### 明日代办
 ```tasks
 due tomorrow
+sort by status
+sort by priority
 ```
-
-
 
 ### 日常
 - [ ] Keep健身计划！ 🔼 🔁 every weekday 📅 2023-11-16
