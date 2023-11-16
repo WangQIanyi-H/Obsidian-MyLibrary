@@ -5,8 +5,9 @@ due today
 
 ### 明日代办
 ```tasks
-due tomm
+due tomorrow
 ```
+
 
 
 ### 日常
