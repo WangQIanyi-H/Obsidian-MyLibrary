@@ -1,1 +1,1 @@
-[ ] Obsidian记录50,000字 👉 奖励自己一个macbook（air, 内存16G, 固态512G, M2）
+[ ] Obsidian记录50,000字 👉 奖励自己一个macbook（air, 内存16G, 固态512G, M2/M1）
