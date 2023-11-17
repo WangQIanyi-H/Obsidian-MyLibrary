@@ -105,7 +105,6 @@ deploy:
   type: git
   repo: https://github.com/WangQIanyi-H/Obsidian-MyLibrary.git
   branch: gh-pages
-  token: $GH_TOKEN
 
 
 # Generate categories from directory-tree

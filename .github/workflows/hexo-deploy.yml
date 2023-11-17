@@ -35,8 +35,6 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
-        git config --global user.name "WangQIanyi"
-        git config --global user.email "wqy1814132364@gmail.com"
         cd Blog/hexo-blog
         rm -rf .deploy_git
         yarn clean
