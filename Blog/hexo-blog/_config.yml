@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://example.com
+url: https://wangqianyi-h.github.io/Obsidian-MyLibrary/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 pretty_urls:
@@ -102,12 +102,6 @@ theme: landscape
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
-  type: ''
-
-# Generate categories from directory-tree
-# Dependencies: https://github.com/xu-song/hexo-auto-category
-# depth: the max_depth of directory-tree you want to generate, should > 0
-# multiple: multiple category hierarchies
-auto_category:
- enable: true
- depth: 
+  type: git
+  repo: https://github.com/WangQIanyi-H/Obsidian-MyLibrary.git
+  branch: gh-pages
