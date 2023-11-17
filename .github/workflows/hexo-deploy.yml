@@ -16,10 +16,16 @@ jobs:
       with:
         node-version: '20.9.0' # 确保这个版本与你本地使用的一致
 
+    - name: Install Hexo
+      run: npm install -g hexo-cli
+
     - name: Setup yarn & Install node_modules
       uses: borales/actions-yarn@v3.0.0
       with:
         cmd: install
+
+    - name: Install hexo-deployer
+      run: npm install hexo-deployer-heroku --save
 
     - name: Build & Deploy
       run: |
