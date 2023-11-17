@@ -10,3 +10,5 @@ Hello World!
 再来试一试
 
 用手机试试
+
+用iPad试试
