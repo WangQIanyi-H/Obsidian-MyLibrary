@@ -31,9 +31,7 @@ jobs:
       with:
         cmd: install
 
-    - name: Build & Deploy
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    - name: Build
       run: |
         git config --global user.name "WangQIanyi"
         git config --global user.email "1814132364@qq.com"
@@ -41,4 +39,13 @@ jobs:
         sed -i'' "s~${GH_TOKEN}@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
         yarn clean
         yarn build
+
+    - name: Deploy
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        git config --global user.name "WangQIanyi"
+        git config --global user.email "1814132364@qq.com"
+        cd Blog/hexo-blog
+        sed -i'' "s~${GH_TOKEN}@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
         yarn deploy
