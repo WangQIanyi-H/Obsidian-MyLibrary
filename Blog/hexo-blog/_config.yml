@@ -103,7 +103,7 @@ theme: landscape
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: https://WangQIanyi-H:${{secrets.GH_TOKEN}}@github.com/WangQIanyi-H/Obsidian-MyLibrary.git
+  repo: https://WangQIanyi-H:${GH_TOKEN}@github.com/WangQIanyi-H/Obsidian-MyLibrary.git
   branch: gh-pages
 
 # Generate categories from directory-tree
