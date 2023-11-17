@@ -105,12 +105,3 @@ deploy:
   type: git
   repo: https://github.com/WangQIanyi-H/Obsidian-MyLibrary.git
   branch: gh-pages
-
-
-# Generate categories from directory-tree
-# Dependencies: https://github.com/xu-song/hexo-auto-category
-# depth: the max_depth of directory-tree you want to generate, should > 0
-# multiple: multiple category hierarchies
-auto_category:
- enable: true
- depth: 
