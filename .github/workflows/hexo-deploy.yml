@@ -11,9 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Tranfer to Correct Dir
-      run: cd Blog/hexo-blog
-
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
@@ -23,7 +20,9 @@ jobs:
       run: rm -rf node_modules && npm install --force
 
     - name: Install Hexo
-      run: npm install -g hexo-cli
+      run: | 
+        cd Blog/hexo-blog
+        npm install -g hexo-cli
 
     - name: Setup yarn & Install node_modules
       uses: borales/actions-yarn@v3.0.0
