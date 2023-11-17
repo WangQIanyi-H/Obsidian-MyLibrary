@@ -35,6 +35,7 @@ jobs:
       run: |
         git config --global user.name "WangQianyi"
         git config --global user.email "wqy1814132364@gmail.com"
+        cd Blog/hexo-blog
         sed -i'' "s~git@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
         rm -rf .deploy_git
         yarn clean
