@@ -16,6 +16,9 @@ jobs:
       with:
         node-version: '20.9.0' # 确保这个版本与你本地使用的一致
 
+    - name: Instal node and npm
+      run: rm -rf node_modules && npm install --force
+
     - name: Install Hexo
       run: npm install -g hexo-cli
 
