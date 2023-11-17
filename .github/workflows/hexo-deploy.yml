@@ -24,9 +24,6 @@ jobs:
       with:
         cmd: install
 
-    - name: Install hexo-deployer
-      run: npm install hexo-deployer-heroku --save
-
     - name: Build & Deploy
       run: |
         git config --global user.name "WangQianyi"
