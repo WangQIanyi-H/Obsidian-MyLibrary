@@ -32,11 +32,12 @@ jobs:
         cmd: install
 
     - name: Build & Deploy
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         git config --global user.name "WangQIanyi"
         git config --global user.email "wqy1814132364@gmail.com"
         cd Blog/hexo-blog
-        sed -i'' "s~git@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
         rm -rf .deploy_git
         yarn clean
         yarn build
