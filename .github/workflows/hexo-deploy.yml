@@ -36,7 +36,6 @@ jobs:
         git config --global user.name "WangQIanyi"
         git config --global user.email "1814132364@qq.com"
         cd Blog/hexo-blog
-        sed -i'' "s~${GH_TOKEN}@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
         yarn clean
         yarn build
 
@@ -47,5 +46,5 @@ jobs:
         git config --global user.name "WangQIanyi"
         git config --global user.email "1814132364@qq.com"
         cd Blog/hexo-blog
-        sed -i'' "s~${GH_TOKEN}@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
+        sed -i'' "s~git@github.com:~https://${{ secrets.GH_TOKEN }}@github.com/~" _config.yml
         yarn deploy
