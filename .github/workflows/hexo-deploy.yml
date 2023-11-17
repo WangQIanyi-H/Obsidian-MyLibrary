@@ -37,7 +37,7 @@ jobs:
       run: |
         git config --global user.name "WangQIanyi"
         git config --global user.email "1814132364@qq.com"
-        git remote set-url origin https://WangQIanyi-H:${{ GH_TOKEN }}@github.com/WangQIanyi-H/Obsidian-MyLibrary.git
+        git remote set-url origin https://WangQIanyi-H:${{ secrets.GH_TOKEN }}@github.com/WangQIanyi-H/Obsidian-MyLibrary.git
         cd Blog/hexo-blog
         yarn clean
         yarn build
