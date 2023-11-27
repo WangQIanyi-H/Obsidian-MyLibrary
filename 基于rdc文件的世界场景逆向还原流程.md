@@ -10,7 +10,8 @@
 想要还原整个世界场景，首先要从导出单个模型开始。
 想要在RenderDoc中导出模型，我们需要先在Event Browser界面选择我们想要导出的那个模型被绘制的那个DrawCall。
 ![[Pasted image 20231127182045.png]]
-这时在Mesh Viewer界面我们可以看到对应模型的信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是
+这时在Mesh Viewer界面我们可以看到对应模型的信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。
+利用VS Input中的信息，结合FBX SDK，我们可以生成模型空间下的Mesh。（具体到如何获取，可以查阅RenderDoc的文档和FBX SDK的文档）
 ## Event Browser
 
 ### Event
