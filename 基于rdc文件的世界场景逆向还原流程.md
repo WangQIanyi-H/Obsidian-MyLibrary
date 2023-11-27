@@ -8,8 +8,9 @@
 
 # 单个模型导出
 想要还原整个世界场景，首先要从导出单个模型开始。
-想要在RenderDoc中导出模型，我们需要先在Event Browser界面选择想要导出的模型被绘制的那个DrawCall
-![[Pasted image 20231127171316.png]]
+想要在RenderDoc中导出模型，我们需要先在Event Browser界面选择我们想要导出的那个模型被绘制的那个DrawCall。
+![[Pasted image 20231127182045.png]]
+这时在Mesh Viewer界面我们可以看到对应模型的信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是
 ## Event Browser
 
 ### Event
