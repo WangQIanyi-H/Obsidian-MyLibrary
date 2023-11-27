@@ -9,7 +9,9 @@
 # 单个模型导出
 想要还原整个世界场景，首先要从导出单个模型开始。
 我们先熟悉一下renderdoc中的一些基本概念。
-首先是Renderdoc中的
+首先是Renderdoc中的Event Browser页面
+![[Pasted image 20231127171316.png]]
+在默认情况下，Event Browser只列出一系列的动作（Action），动作指的是诸如绘制、分发、复制、清除、解析等事件（Event），
 
 # 还原世界坐标
 
