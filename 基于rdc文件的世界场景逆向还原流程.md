@@ -8,9 +8,10 @@
 
 # 单个模型导出
 想要还原整个世界场景，首先要从导出单个模型开始。
-想要在RenderDoc中导出模型，我们需要先在Event Browser界面选择我们想要导出的那个模型被绘制的那个DrawCall（一般都是通过遍历Event，来判断这个Action是否是）。
+想要在RenderDoc中导出模型，我们需要先在Event Browser界面选择我们想要导出的那个模型被绘制的那个DrawCall（一般都是通过遍历Event，来判断这个Event是否是Action，然后在判断这个Action的指令是否是一个DrawCall，如果是一个DrawCall在进行下面的操作）。
 这时在Mesh Viewer界面我们可以看到对应模型的信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。
 利用VS Input中的信息，结合FBX SDK，我们可以生成模型空间下的Mesh。（具体到如何获取，可以查阅RenderDoc的文档[RenderDoc文档](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)和FBX SDK的文档）
+VS Output的信息我们在下面也会用到。
 与此同时，我们在Texture Viewer界面下的Inputs窗口中，可以找到这个DrawCall下输入进片元着色器的贴图，我们可以通过这些贴图的命名，来识别出Diffuse、Normal等贴图，在导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
 ## Event Browser
 
