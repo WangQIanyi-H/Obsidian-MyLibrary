@@ -139,7 +139,8 @@ def SaveAsFbx(DataFrame, saveName):
     fbxManager.Destroy()  
     del fbxManager, fbxScene, DataFrame
 ```
-与此同时，我们在Texture Viewer界面下的Inputs窗口中，可以找到这个DrawCall下输入进片元着色器的贴图，我们可以通过这些贴图的命名，来识别出Diffuse、Normal等贴图，在导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
+与此同时，我们可以我们导出当前DrawCall下所使用的贴图资源，可以参照RenderDoc官网的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/save_texture.html)对贴图进行导出。
+我们可以通过这些贴图的命名，来识别，在导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
 ## Event Browser
 
 ### Event
