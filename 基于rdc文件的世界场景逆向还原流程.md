@@ -13,7 +13,10 @@
 找到特定的Action后，我们就可以导出模型信息了。
 我们可以在Mesh Viewer界面看到模型的相关信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。
 ![[Pasted image 20231128154333.png]]
-我们可以从VS Input中获取每个顶点
+RenderDoc提供了相应的接口让我们可以拿到VS Input和VS output中的数据。官方文档中也有关于解析Mesh数据的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)可以参考。
+光有Mesh的数据还不够，我们还需要将这些数据转换成fbx的格式。
+我们可以使用FBX SDK来创建FBX文件。
+
 VS Output的信息我们在下面也会用到。
 与此同时，我们在Texture Viewer界面下的Inputs窗口中，可以找到这个DrawCall下输入进片元着色器的贴图，我们可以通过这些贴图的命名，来识别出Diffuse、Normal等贴图，在导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
 ## Event Browser
