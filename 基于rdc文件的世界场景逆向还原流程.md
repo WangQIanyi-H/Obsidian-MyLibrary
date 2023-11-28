@@ -15,9 +15,130 @@
 ![[Pasted image 20231128154333.png]]
 RenderDoc提供了相应的接口让我们可以拿到VS Input和VS output中的数据。官方文档中也有关于解析Mesh数据的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)可以参考。
 光有Mesh的数据还不够，我们还需要将这些数据转换成fbx的格式。
-我们可以使用FBX SDK来创建FBX文件。
-
-VS Output的信息我们在下面也会用到。
+我们可以使用FBX SDK来创建FBX文件。下面是根据Mesh信息创建fbx文件的示例。
+```Python
+def SaveAsFbx(DataFrame, saveName):  
+    fbxName = os.path.basename(saveName).split(".")[0]  
+    fbxManager = FbxManager.Create()  
+    fbxScene = FbxScene.Create(fbxManager, "")  
+    rootNode = fbxScene.GetRootNode()  
+    FbxSystemUnit.ConvertScene(FbxSystemUnit.m, fbxScene)  
+  
+    # Mesh node创建  
+    newNode = FbxNode.Create(fbxScene, fbxName)  
+    FbxNode.AddChild(rootNode, newNode)  
+    mesh = FbxMesh.Create(fbxScene, fbxName + "_Mesh")  
+    newNode.SetNodeAttribute(mesh)  
+  
+    DataFrame_change = DataFrame.drop_duplicates(subset=["IDX"], keep="first", inplace=False)  
+    DataFrame_change = DataFrame_change.sort_values(by="IDX", ascending=True) 
+    # -----------------添加Mesh----------------#  
+    mesh.InitControlPoints(len(DataFrame_change))  
+    pos = []  
+    idx_binding_info = []  
+    for i in range(0, len(DataFrame_change)):  
+        pos.append(np.array([DataFrame_change.iloc[i][attribute_export[0] + ".x"],  
+                             DataFrame_change.iloc[i][attribute_export[0] + ".y"],  
+                             DataFrame_change.iloc[i][attribute_export[0] + ".z"]]))  
+        # 重组位置数据  
+        vertexPos = FbxVector4(DataFrame_change.iloc[i][attribute_export[0] + ".x"],  
+                               DataFrame_change.iloc[i][attribute_export[0] + ".y"],  
+                               DataFrame_change.iloc[i][attribute_export[0] + ".z"])  
+        mesh.SetControlPointAt(vertexPos, i)  
+        idx_binding_info.append(int(DataFrame_change.iloc[i]["IDX"]))  
+   
+    # 重构三角面  
+    for j in range(0, int(vertexCount / 3.0)):  
+        # 将vertex与point相互绑定  
+        mesh.BeginPolygon(j)  
+        mesh.AddPolygon(idx_binding_info.index(int(DataFrame.iloc[j * 3]["IDX"])))  
+        mesh.AddPolygon(idx_binding_info.index(int(DataFrame.iloc[j * 3 + 1]["IDX"])))  
+        mesh.AddPolygon(idx_binding_info.index(int(DataFrame.iloc[j * 3 + 2]["IDX"])))  
+        mesh.EndPolygon()  
+  
+    # ----------------添加Normal----------------#  
+    if attribute_export[1] + ".x" in DataFrame_change:  
+        # 创建Normal Layer  
+        normalLayer = mesh.GetLayer(0)  
+        if normalLayer is None:  
+            mesh.CreateLayer()  
+            normalLayer = mesh.GetLayer(0)  
+  
+        # 创建layerElementNormal  
+        layerElementNormal = FbxLayerElementNormal.Create(mesh, "")  
+        layerElementNormal.SetMappingMode(FbxLayerElement.EMappingMode(1))  # EMappingMode.eByControlPoint  
+        layerElementNormal.SetReferenceMode(FbxLayerElement.EReferenceMode(0))  # EReferenceMode.eDirect  
+  
+        # 从DataFrame_change中获取Normal数组  
+        normalArray = []  
+        for i in range(0, len(DataFrame_change)):  
+            normalArray.append(np.array([DataFrame_change.iloc[i][attribute_export[1] + ".x"],  
+                                         DataFrame_change.iloc[i][attribute_export[1] + ".y"],  
+                                         DataFrame_change.iloc[i][attribute_export[1] + ".z"],  
+                                         DataFrame_change.iloc[i][attribute_export[1] + ".w"]]))  
+  
+        # 将Normal数组传入layerElementNormal中  
+        for i in range(0, len(DataFrame_change)):  
+            vertexNormal = FbxVector4(normalArray[i][0], normalArray[i][1], normalArray[i][2], normalArray[i][3])  
+            layerElementNormal.GetDirectArray().Add(vertexNormal)  
+  
+        normalLayer.SetNormals(layerElementNormal)  
+  
+    # ----------------添加Vertex Color----------------#  
+    # 创建Vertex Color Layer  
+    if attribute_export[3] + ".x" in DataFrame_change:  
+        vcolorLayer = mesh.GetLayer(0)  
+        if vcolorLayer is None:  
+            mesh.CreateLayer()  
+            vcolorLayer = mesh.GetLayer(0)  
+  
+        # 创建layerElementVcolor  
+        layerElementVcolor = FbxLayerElementVertexColor.Create(mesh, "")  
+        layerElementVcolor.SetMappingMode(FbxLayerElement.EMappingMode(1))  # EMappingMode.eByControlPoint  
+        layerElementVcolor.SetReferenceMode(FbxLayerElement.EReferenceMode(0))  # EReferenceMode.eDirect  
+  
+        # 从DataFrame_change中获取Normal数组  
+        vcolorArray = []  
+        for i in range(0, len(DataFrame_change)):  
+            vcolorArray.append(np.array([DataFrame_change.iloc[i][attribute_export[3] + ".x"],  
+                                         DataFrame_change.iloc[i][attribute_export[3] + ".y"],  
+                                         DataFrame_change.iloc[i][attribute_export[3] + ".z"],  
+                                         DataFrame_change.iloc[i][attribute_export[3] + ".w"]]))  
+        # 将Vertex Color数组传入layerElementVcolor中  
+        for i in range(0, len(DataFrame_change)):  
+            vertexColor = FbxColor(vcolorArray[i][0], vcolorArray[i][1], vcolorArray[i][2], vcolorArray[i][3])  
+            layerElementVcolor.GetDirectArray().Add(vertexColor)  
+        normalLayer.SetVertexColors(layerElementVcolor)  
+  
+    # ----------------添加UV0----------------#  
+    # 创建UV0 Layer  
+    if attribute_export[2] + ".x" in DataFrame_change:  
+        uv0Layer = mesh.GetLayer(0)  
+        if uv0Layer is None:  
+            mesh.CreateLayer()  
+            uv0Layer = mesh.GetLayer(0)  
+  
+        # 创建layerElementUV0  
+        layerElementUV0 = FbxLayerElementUV.Create(mesh, attribute_export[2])  
+        layerElementUV0.SetMappingMode(FbxLayerElement.EMappingMode(1))  # EMappingMode.eByControlPoint  
+        layerElementUV0.SetReferenceMode(FbxLayerElement.EReferenceMode(0))  # EReferenceMode.eDirect  
+  
+        # 从DataFrame_change中获取TEXCOORD0数组  
+        uv0Array = []  
+        for i in range(0, len(DataFrame_change)):  
+            uv0Array.append(np.array([DataFrame_change.iloc[i][attribute_export[2] + ".x"],  
+                                      DataFrame_change.iloc[i][attribute_export[2] + ".y"]]))  
+        # 将uv0Array传入layerElementUV0中  
+        for i in range(0, len(DataFrame_change)):  
+            vertexUV0 = FbxVector2(uv0Array[i][0], uv0Array[i][1])  
+            layerElementUV0.GetDirectArray().Add(vertexUV0)  
+        uv0Layer.SetUVs(layerElementUV0)  
+  
+    # ----------------FBX导出----------------#  
+    saveScene(saveName, fbxManager, fbxScene, pAsASCII=True)  
+    fbxManager.Destroy()  
+    del fbxManager, fbxScene, DataFrame
+```
 与此同时，我们在Texture Viewer界面下的Inputs窗口中，可以找到这个DrawCall下输入进片元着色器的贴图，我们可以通过这些贴图的命名，来识别出Diffuse、Normal等贴图，在导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
 ## Event Browser
 
