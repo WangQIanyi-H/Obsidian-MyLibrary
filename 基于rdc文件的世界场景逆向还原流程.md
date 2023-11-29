@@ -181,10 +181,47 @@ def SaveAsFbx(DataFrame, saveName):
 ### 引擎中的MVP变换
 以Unity为例。在Unity中，我们可以通常可以直接拿到MVP变换矩阵来进行MVP矩阵变换。下面是Lit的部分源码
 ```c
-input.positionWS = TransformObjectToWorld(positionOS);  
-input.positionVS = TransformWorldToView(input.positionWS);  
-input.positionCS = TransformWorldToHClip(input.positionWS);
+struct Attributes  
+{  
+	...
+	float4 positionOS : POSITION;  
+	...
+};
+
+struct Varyings  
+{  
+	...
+	float4 positionCS : SV_POSITION;  
+	...
+};
+
+VertexPositionInputs GetVertexPositionInputs(float3 positionOS)  
+{  
+	VertexPositionInputs input;  
+	input.positionWS = TransformObjectToWorld(positionOS);  
+	input.positionVS = TransformWorldToView(input.positionWS);  
+	input.positionCS = TransformWorldToHClip(input.positionWS);  
+  
+	float4 ndc = input.positionCS * 0.5f;  
+	input.positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;  
+	input.positionNDC.zw = input.positionCS.zw;  
+  
+return input;  
+}
+
+Varyings LitPassVertex(Attributes input)  
+{
+	...
+	VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
+	...
+#if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)  
+	output.positionWS = vertexInput.positionWS;  
+#endif
+	output.positionCS = vertexInput.positionCS;  
+	return output;
+}
 ```
+可以发现，
 MVP变换通常是在顶点着色器中进行。在引擎中，顶点着色器会输出顶点在裁剪空间的位置，然后图形管线会根据顶点着色器的输出，将这些坐标自动进行NDC变换，转换到NDC空间，以便于后续的光栅化和像素着色阶段。
 
 > [!NOTE] RenderDoc中的VS Input和VS Output
