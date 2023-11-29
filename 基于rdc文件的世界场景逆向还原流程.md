@@ -13,7 +13,10 @@
 找到特定的Action后，我们就可以导出模型信息了。
 我们可以在Mesh Viewer界面看到模型的相关信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。
 ![[Pasted image 20231128154333.png]]
+## 提取模型信息
 RenderDoc提供了相应的接口让我们可以拿到VS Input和VS output中的数据。官方文档中也有关于解析Mesh数据的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)可以参考。
+## 提取贴图信息
+## 生成FBX文件
 光有Mesh的数据还不够，我们还需要将这些数据转换成fbx的格式。
 我们可以使用FBX SDK来创建FBX文件。下面是根据Mesh信息创建fbx文件的示例。
 ```Python
@@ -141,24 +144,23 @@ def SaveAsFbx(DataFrame, saveName):
 ```
 与此同时，我们也需要导出当前DrawCall下所使用的贴图资源，可以参照RenderDoc官网的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/save_texture.html)对贴图进行导出。
 在贴图命名正确的情况下，可以根据命名规律找出Diffuse、Normal等贴图。然后导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
-## Event Browser
 
-### Event
-在RenderDoc中，事件（Event）指的是各种图形API的调用。这些事件可以包括
-1. **绘制调用**（Draw Calls）：这些是图形应用程序中最常见的事件之一，涉及到将几何数据（如顶点）送入图形管线进行渲染。
-2. **状态改变**：这些事件涉及到改变图形管线的状态，例如改变混合模式、剪裁设置或其它渲染状态。
-3. **资源操作**：包括创建、修改、删除纹理、缓冲区等图形资源的事件。
-4. **分发计算调用**：在使用计算着色器时执行的调用，这些着色器不直接涉及渲染，而是用于各种计算任务。
-5. **内存操作**：例如复制或更新缓冲区或纹理的内容。
-在RenderDoc中，可以通过Event Browser来查看这些事件。它允许用户逐一检查每个事件。
-### Action
-在RenderDoc中，“Action"是指引发GPU执行工作或影响内存及资源（如纹理和缓存区）的具体调用或事件。这些动作通常包括但不限于以下几种：
-1. **绘制调用**（Draw Calls）：这是最常见的动作类型，涉及将几何数据（例如顶点和索引）发送到GPU进行渲染处理。
-2. **分发调用**（Dispatch Calls）：这些是计算着色器的调用，它们不是直接进行图形渲染，而是执行例如数据处理等计算任务。
-3. **清除操作**（Clears）：清除特定图形资源，如帧缓冲、纹理或深度缓冲区。
-4. **复制操作**（Copies）：在资源之间复制数据，例如从一个纹理复制到另一个纹理。
-5. **解析操作**（Resolves）：涉及多采样纹理的处理，如将多采样帧缓冲区解析为单采样纹理
-在RenderDoc中，一个Action一定是一个Event，一个Event并不一定是一个Aciton。
+> [!NOTE] Event
+> 在RenderDoc中，事件（Event）指的是各种图形API的调用。这些事件可以包括 
+> 1. **绘制调用**（Draw Calls）：这些是图形应用程序中最常见的事件之一，涉及到将几何数据（如顶点）送入图形管线进行渲染。
+> 2. **资源操作**：包括创建、修改、删除纹理、缓冲区等图形资源的事件。
+> 3. **分发计算调用**：在使用计算着色器时执行的调用，这些着色器不直接涉及渲染，而是用于各种计算任务。
+> 4. **内存操作**：例如复制或更新缓冲区或纹理的内容。
+> 在RenderDoc中，可以通过Event Browser来查看这些事件。它允许用户逐一检查每个事件。
+
+> [!NOTE] Action
+> 在RenderDoc中，“Action"是指引发GPU执行工作或影响内存及资源（如纹理和缓存区）的具体调用或事件。这些动作通常包括但不限于以下几种：
+> 1. **绘制调用**（Draw Calls）：这是最常见的动作类型，涉及将几何数据（例如顶点和索引）发送到GPU进行渲染处理。
+> 2. **分发调用**（Dispatch Calls）：这些是计算着色器的调用，它们不是直接进行图形渲染，而是执行例如数据处理等计算任务。
+> 3. **清除操作**（Clears）：清除特定图形资源，如帧缓冲、纹理或深度缓冲区。
+> 4. **清除操作**（Clears）：清除特定图形资源，如帧缓冲、纹理或深度缓冲区。
+> 5. **解析操作**（Resolves）：涉及多采样纹理的处理，如将多采样帧缓冲区解析为单采样纹理
+> 在RenderDoc中，Action一定是Event，Event并不一定是Aciton。
 
 # 还原世界坐标
 我们现在可以拿到VS Input和VS Output中的Mesh信息，但是想要还原整个世界场景，我们还需要将VS Input（模型空间）或是VS Output（屏幕空间）的Mesh信息转换到世界空间。
@@ -177,14 +179,16 @@ def SaveAsFbx(DataFrame, saveName):
 - 这个变换定义了视锥体（View Frustum），它决定了哪些部分的场景被渲染到屏幕上。
 - 投影变换可以是透视投影（Perspective Projection）或正交投影（Orthographic Projection）。
 ### 引擎中的MVP变换
-以Unity为例
-在Unity中，我们可以直接拿到MVP变换矩阵。
-MVP变换通常是在顶点着色器中进行。在引擎中，顶点着色器会输出顶点在裁剪空间的位置，然后图形管线会根据顶点着色器的输出，将这些坐标自动进行NDC变换，转换到NDC空间，以便于后续的光栅化和像素着色阶段。所以我们在RenderDoc的MeshViewer中看见的VS Input是未经过MVP变换的Mesh信息，VS Output是经过了MVP变换转换到了裁剪空间，但是并没有转换到NDC空间。
+以Unity为例。在Unity中，我们可以直接拿到MVP变换矩阵。
+
+MVP变换通常是在顶点着色器中进行。在引擎中，顶点着色器会输出顶点在裁剪空间的位置，然后图形管线会根据顶点着色器的输出，将这些坐标自动进行NDC变换，转换到NDC空间，以便于后续的光栅化和像素着色阶段。
 
 > [!NOTE] RenderDoc中的VS Input和VS Output
-> RenderDoc的MeshViewer中看见的VS Input是未经过MVP变换的Mesh信息，VS Output是经过了MVP变换转换到了裁剪空间，但是并没有转换到NDC空间。
+> 我们在RenderDoc的MeshViewer中看见的VS Input是未经过MVP变换的Mesh信息，VS Output是经过了MVP变换转换到了裁剪空间，但是并没有转换到NDC空间。
 
 在Unity的实际编程中，一般来说并不需要直接操作这些矩阵，因为Unity提供了更高层次的抽象。但是我们需要了解这些以便于更好的去理解后面的步骤。
+## 找到变换矩阵
+我们现在知道了
 - 介绍MVP变换
 - 找到矩阵
 - 还原
