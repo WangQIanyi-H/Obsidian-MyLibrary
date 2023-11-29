@@ -224,7 +224,7 @@ Varyings LitPassVertex(Attributes input)
 不难发现，输入到顶点着色器的位置坐标POSITION是处于模型空间，对应的是变量positionOS，但是在Lit中，尽管对于世界空间、视图空间、裁剪空间、NDC空间的坐标都有计算，但是最后输出到SV_POSITION的是裁剪空间坐标positionCS。
 所以，RenderDoc中的VS Input通常代表的是模型空间下的Mesh信息，VS Output通常代表的是裁剪空间下的Mesh信息。
 ### 利用变换矩阵还原世界坐标
-我们现在已经
+我们现在已经知道了，VS Input中Mesh的坐标信息通过MVP变换（不包括NDC变换）可以得到
 ## 找到变换矩阵
 我们现在知道了
 - 介绍MVP变换
