@@ -1,8 +1,7 @@
-本文将介绍，在使用RenderDoc软件在游戏中进行截帧后，该如何利用rdc文件，来导出世界坐标的模型，从而还原游戏场景。
-
+本文将介绍，在使用RenderDoc软件在游戏中进行截帧后，该如何利用rdc文件，来导出带有世界坐标的模型，从而还原游戏场景。
 本篇文章将从以下几个方面对该流程进行阐述
-- 导出单个模型：使用renderdoc的python接口、fbxsdk对单个drawcall进行导出，在此处创建材质，匹配贴图，介绍导出贴图的一些坑（renderdoc版本，python版本）
-- 找到变换矩阵：通过找到vp矩阵或者vp矩阵的逆，将模型从local space转换到world space（在转换过程中会有误差）
+- 如何导出单个模型：使用renderdoc的python接口、fbxsdk对单个drawcall的mesh进行导出，在此处创建材质，匹配贴图，介绍导出贴图的一些坑（renderdoc版本，python版本）
+- 找到变换矩阵：通过找到vp矩阵或者vp矩阵的逆，将模型从local space转换到world space，或是从Clip Space转到World Space（在转换过程中会有误差）
 - 进行批量导出：该如何进行批量导出，批量导出时需要注意到的一些坑
 - 导入Unity中并生成Prefab，对场景进行还原：将模型导入Unity后，将如何批量生成Prefab及其lod，并且采用Prefab的实例化方式来代替一个个的模型
 
@@ -162,7 +161,7 @@ def SaveAsFbx(DataFrame, saveName):
 ```
 与此同时，我们也需要导出当前DrawCall下所使用的贴图资源，可以参照RenderDoc官网的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/save_texture.html)对贴图进行导出。
 在贴图命名正确的情况下，可以根据命名规律找出Diffuse、Normal等贴图。然后导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
-# 还原世界坐标
+# 世界坐标还原
 我们现在可以拿到VS Input和VS Output中的Mesh信息，但是想要还原整个世界场景，我们还需要将VS Input（模型空间）或是VS Output（屏幕空间）的Mesh信息转换到世界空间。
 想要将模型空间坐标或是屏幕空间坐标还原到世界空间，我们首先需要简单了解一下MVP变换。
 ## MVP变换介绍
@@ -223,15 +222,13 @@ Varyings LitPassVertex(Attributes input)
 ```
 不难发现，输入到顶点着色器的位置坐标POSITION是处于模型空间，对应的是变量positionOS，但是在Lit中，尽管对于世界空间、视图空间、裁剪空间、NDC空间的坐标都有计算，但是最后输出到SV_POSITION的是裁剪空间坐标positionCS。
 所以，RenderDoc中的VS Input通常代表的是模型空间下的Mesh信息，VS Output通常代表的是裁剪空间下的Mesh信息。
-### 利用变换矩阵还原世界坐标
+## 利用变换矩阵还原世界坐标
 我们现在已经知道了，VS Input中Mesh的POSITION通过MVP变换（不包括NDC变换）转换到VS Output中的SV_POSITION。
 那么想要得到模型的世界空间坐标，我们可以有两种做法
 - VS Input的POSTION乘以M矩阵（模型变换矩阵）可以得到模型的世界空间坐标。
 - VS Output的SV_POSITION乘以VP矩阵（视图变换矩阵乘以投影变换矩阵的结果）的逆
 第一种方法得到的世界空间坐标会更加准确，但缺点是M矩阵在很多情况下很难提取，并且大多数的模型的M矩阵会不一样。第二种方法得到世界空间坐标会有很小的误差（在计算逆矩阵时所导致的误差），尽管VP矩阵在一些情况下提取起来也不方便，但是优点在于在同一帧的情况下，场景中的物体所使用的的VP矩阵通常是不变的，所以此时我们可以人工找到VP矩阵的位置，以此来对世界空间的坐标进行还原。
-## 找到变换矩阵
-我们现在知道了
-- 介绍MVP变换
-- 找到矩阵
-- 还原
+### 利用M矩阵还原
+### 利用VP矩阵还原
+
 # 批量导出
