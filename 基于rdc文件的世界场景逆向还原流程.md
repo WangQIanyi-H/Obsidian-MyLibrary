@@ -222,11 +222,9 @@ Varyings LitPassVertex(Attributes input)
 }
 ```
 不难发现，输入到顶点着色器的位置坐标POSITION是处于模型空间，对应的是变量positionOS，但是在Lit中，尽管对于世界空间、视图空间、裁剪空间、NDC空间的坐标都有计算，但是最后输出到SV_POSITION的是裁剪空间坐标positionCS。
-所以说，我们在RenderDoc的
-
-在Unity的实际编程中，通常来说并不需要直接操作这些矩阵，因为Unity提供了更高层次的抽象。但是我们需要了解这些以便于更好的去理解后面的步骤。
+所以，RenderDoc中的VS Input通常代表的是模型空间下的Mesh信息，VS Output通常代表的是裁剪空间下的Mesh信息。
 ### 利用变换矩阵还原世界坐标
-
+我们现在已经
 ## 找到变换矩阵
 我们现在知道了
 - 介绍MVP变换
