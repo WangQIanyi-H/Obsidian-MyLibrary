@@ -162,7 +162,22 @@ def SaveAsFbx(DataFrame, saveName):
 
 # 还原世界坐标
 我们现在可以拿到VS Input和VS Output中的Mesh信息，但是想要还原整个世界场景，我们还需要将VS Input（模型空间）或是VS Output（屏幕空间）的Mesh信息转换到世界空间。
-想要将模型空间坐标或是屏幕空间坐标还原到世界空间，
+想要将模型空间坐标或是屏幕空间坐标还原到世界空间，我们首先需要简单了解一下MVP变换。
+## MVP变换
+在图形流水线中，MVP变换指的是一系列坐标空间变换，这些转换通过将模型变换（Model Transform）、视图变换（View Transform）和投影变换（Projection Transform）相结合来实现。这三种变换共同组成了MVP变换，它们将3D场景中的对象转换到一个二维图像上，以便在屏幕上渲染。下面详细介绍每个组成部分：
+### 模型变换（Model Transform）
+- 用于将对象从模型空间（对象自己的局部坐标系统）转换到世界空间（场景的全局坐标系统）。
+- 它包括平移（Translation）、旋转（Rotation）和缩放（Scale）操作。
+### 视图变换（View Transform）
+- 将对象从世界空间转换到视图空间（也称为摄像机空间或眼睛空间）。
+- 在视图空间中，观察点（通常是虚拟摄像机）位于原点，所有对象都相对于这个观察点进行定位。
+- 这个变换通常由摄像机的位置和方向决定。
+### 投影变换（Projection Transform）
+- 将视图空间中的3D坐标转换到剪裁空间（Clip Space），并最终通过透视除法转换为归一化设备坐标（Normalized Device Coordinates, NDC）。
+- 这个变换定义了视锥体（View Frustum），它决定了哪些部分的场景被渲染到屏幕上。
+- 投影变换可以是透视投影（Perspective Projection）或正交投影（Orthographic Projection）。
+### 引擎中的MVP变换
+在Unity中，可以直接
 - 介绍MVP变换
 - 找到矩阵
 - 还原
