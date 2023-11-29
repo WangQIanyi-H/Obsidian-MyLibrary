@@ -161,7 +161,7 @@ def SaveAsFbx(DataFrame, saveName):
 在RenderDoc中，一个Action一定是一个Event，一个Event并不一定是一个Aciton。
 
 # 还原世界坐标
-我们现在可以导出模型空间下的模型了
+我们现在可以导出模型空间下的模型了，但是想要还原整个世界场景，我们还需要将模型转换到世界空间。
 - 介绍MVP变换
 - 找到矩阵
 - 还原
