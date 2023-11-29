@@ -161,7 +161,7 @@ def SaveAsFbx(DataFrame, saveName):
 在RenderDoc中，一个Action一定是一个Event，一个Event并不一定是一个Aciton。
 
 # 还原世界坐标
-我们现在可以拿到VS Input和VS Output，但是想要还原整个世界场景，我们还需要将模型转换到世界空间。
+我们现在可以拿到VS Input和VS Output，但是想要还原整个世界场景，我们还需要将VS Input（模型空间）或是VS Output（屏幕空间）转换到世界空间。
 - 介绍MVP变换
 - 找到矩阵
 - 还原
