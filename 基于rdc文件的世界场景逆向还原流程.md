@@ -178,8 +178,13 @@ def SaveAsFbx(DataFrame, saveName):
 - 投影变换可以是透视投影（Perspective Projection）或正交投影（Orthographic Projection）。
 ### 引擎中的MVP变换
 以Unity为例
-在Unity中，可以直接拿到MVP变换矩阵
-在Unity的实际编程
+在Unity中，我们可以直接拿到MVP变换矩阵。
+MVP变换通常是在顶点着色器中进行。在引擎中，顶点着色器会输出顶点在裁剪空间的位置，然后图形管线会根据顶点着色器的输出，将这些坐标自动进行NDC变换，转换到NDC空间，以便于后续的光栅化和像素着色阶段。所以我们在RenderDoc的MeshViewer中看见的VS Input是未经过MVP变换的Mesh信息，VS Output是经过了MVP变换转换到了裁剪空间，但是并没有转换到NDC空间。
+
+> [!NOTE] RenderDoc中的VS Input和VS Output
+> RenderDoc的MeshViewer中看见的VS Input是未经过MVP变换的Mesh信息，VS Output是经过了MVP变换转换到了裁剪空间，但是并没有转换到NDC空间。
+
+在Unity的实际编程中，一般来说并不需要直接操作这些矩阵，因为Unity提供了更高层次的抽象。但是我们需要了解这些以便于更好的去理解后面的步骤。
 - 介绍MVP变换
 - 找到矩阵
 - 还原
