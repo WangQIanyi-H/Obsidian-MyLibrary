@@ -177,7 +177,9 @@ def SaveAsFbx(DataFrame, saveName):
 - 这个变换定义了视锥体（View Frustum），它决定了哪些部分的场景被渲染到屏幕上。
 - 投影变换可以是透视投影（Perspective Projection）或正交投影（Orthographic Projection）。
 ### 引擎中的MVP变换
-在Unity中，可以直接
+以Unity为例
+在Unity中，可以直接拿到MVP变换矩阵
+在Unity的实际编程
 - 介绍MVP变换
 - 找到矩阵
 - 还原
