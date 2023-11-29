@@ -179,8 +179,12 @@ def SaveAsFbx(DataFrame, saveName):
 - 这个变换定义了视锥体（View Frustum），它决定了哪些部分的场景被渲染到屏幕上。
 - 投影变换可以是透视投影（Perspective Projection）或正交投影（Orthographic Projection）。
 ### 引擎中的MVP变换
-以Unity为例。在Unity中，我们可以直接拿到MVP变换矩阵。
-
+以Unity为例。在Unity中，我们可以通常可以直接拿到MVP变换矩阵来进行MVP矩阵变换。下面是Lit的部分源码
+```c
+input.positionWS = TransformObjectToWorld(positionOS);  
+input.positionVS = TransformWorldToView(input.positionWS);  
+input.positionCS = TransformWorldToHClip(input.positionWS);
+```
 MVP变换通常是在顶点着色器中进行。在引擎中，顶点着色器会输出顶点在裁剪空间的位置，然后图形管线会根据顶点着色器的输出，将这些坐标自动进行NDC变换，转换到NDC空间，以便于后续的光栅化和像素着色阶段。
 
 > [!NOTE] RenderDoc中的VS Input和VS Output
