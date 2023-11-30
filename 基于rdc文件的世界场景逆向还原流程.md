@@ -427,4 +427,9 @@ def get_constant_buffer(self, buffer_name):
 想要批量导出，我们可以让用户输入EventID或是ActionID的起始ID和终止ID。然后通过遍历这些ID，通过ID来查找Action，找到Action后用单个模型导出的逻辑进行导出。
 在批量导出的过程中需要注意的是，在DX11或DX12平台下截的帧，需要对使用DrawIndexedInstanced和DrawIndexInstancedIndirect的Action进行特殊处理，因为这两者都在一个Action（或者说是DrawCall）下画了多个不同位置的同一个mesh，也就是说，他们的mesh信息相同，但是平移旋转缩放信息可能不同。
 在使用M矩阵进行还原时，就要注意这一个Action下就会要用到多个不同的M矩阵（提取的时候会很麻烦）。在使用VP矩阵进行还原时，会发现RenderDoc提供了各个不同Instance的VS Output的信息，通过RenderDoc提供的API进行获取即可。
-
+## 导入Unity
+在对模型和贴图进行导出后，我们需要将这些资源导入到Unity中进行场景的搭建。
+### 贴图
+贴图在导入Unity时需要勾掉sRGB颜色才正确。
+需要上下翻转贴图才能对上模型UV(要么转贴图要么翻UV)。
+### 模型
