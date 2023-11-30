@@ -310,5 +310,85 @@ def lookRotation(forward, up):
 ### 利用VP矩阵还原
 同样的，在某些情况下，我们是可以截帧可以截到带有标识的VP矩阵或是VP矩阵的逆。
 
-而大部分情况下，我们是很难看出VP矩阵的位置的。但是通常情况来说
+而大部分情况下，我们是很难看出VP矩阵的位置的。
+但由于VP矩阵在同一帧的情况下，值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
+如下面的DXBC源码，VP矩阵被存到了cb2[17]、cb2[18]、cb2[19]、cb[20]里。
+```c
+Shader hash 8634519c-eed57e18-acf405ef-ee12b6fb
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[51], immediateIndexed
+      dcl_constantbuffer cb1[7], immediateIndexed
+      dcl_constantbuffer cb2[10], immediateIndexed
+      dcl_constantbuffer cb3[21], immediateIndexed
+      dcl_input v0.xyz
+      dcl_input v1.xyzw
+      dcl_input v2.xyz
+      dcl_input v3.xy
+      dcl_input v4.xy
+      dcl_input v5.xyzw
+      dcl_output_siv o0.xyzw, position
+      dcl_output o1.xyzw
+      dcl_output o2.xyzw
+      dcl_output o3.xyzw
+      dcl_output o4.xyzw
+      dcl_output o5.xyzw
+      dcl_output o6.xyzw
+      dcl_temps 5
+   0: mul r0.xyzw, v0.yyyy, cb2[1].xyzw
+   1: mad r0.xyzw, cb2[0].xyzw, v0.xxxx, r0.xyzw
+   2: mad r0.xyzw, cb2[2].xyzw, v0.zzzz, r0.xyzw
+   3: add r0.xyzw, r0.xyzw, cb2[3].xyzw
+   4: mul r1.xyzw, r0.yyyy, cb3[18].xyzw
+   5: mad r1.xyzw, cb3[17].xyzw, r0.xxxx, r1.xyzw
+   6: mad r1.xyzw, cb3[19].xyzw, r0.zzzz, r1.xyzw
+   7: mad r0.xyzw, cb3[20].xyzw, r0.wwww, r1.xyzw
+   8: mov o0.xyzw, r0.xyzw
+   9: eq r1.x, cb0[49].y, l(0)
+  10: movc r1.xy, r1.xxxx, v3.xyxx, v4.xyxx
+  11: mad o1.zw, r1.xxxy, cb0[50].xxxy, cb0[50].zzzw
+  12: mad o1.xy, v3.xyxx, cb0[45].xyxx, cb0[45].zwzz
+  13: dp3 r1.y, v2.xyzx, cb2[4].xyzx
+  14: dp3 r1.z, v2.xyzx, cb2[5].xyzx
+  15: dp3 r1.x, v2.xyzx, cb2[6].xyzx
+  16: dp3 r1.w, r1.xyzx, r1.xyzx
+  17: rsq r1.w, r1.w
+  18: mul r1.xyz, r1.wwww, r1.xyzx
+  19: mul r2.xyz, v1.yyyy, cb2[1].yzxy
+  20: mad r2.xyz, cb2[0].yzxy, v1.xxxx, r2.xyzx
+  21: mad r2.xyz, cb2[2].yzxy, v1.zzzz, r2.xyzx
+  22: dp3 r1.w, r2.xyzx, r2.xyzx
+  23: rsq r1.w, r1.w
+  24: mul r2.xyz, r1.wwww, r2.xyzx
+  25: mul r3.xyz, r1.xyzx, r2.xyzx
+  26: mad r3.xyz, r1.zxyz, r2.yzxy, -r3.xyzx
+  27: mul r1.w, v1.w, cb2[9].w
+  28: mul r3.xyz, r1.wwww, r3.xyzx
+  29: mov o2.y, r3.x
+  30: mul r4.xyz, v0.yyyy, cb2[1].xyzx
+  31: mad r4.xyz, cb2[0].xyzx, v0.xxxx, r4.xyzx
+  32: mad r4.xyz, cb2[2].xyzx, v0.zzzz, r4.xyzx
+  33: add r4.xyz, r4.xyzx, cb2[3].xyzx
+  34: mov o2.w, r4.x
+  35: mov o2.x, r2.z
+  36: mov o2.z, r1.y
+  37: mov o3.x, r2.x
+  38: mov o4.x, r2.y
+  39: mov o3.z, r1.z
+  40: mov o4.z, r1.x
+  41: mov o3.w, r4.y
+  42: mov o4.w, r4.z
+  43: mov o3.y, r3.y
+  44: mov o4.y, r3.z
+  45: mul r0.y, r0.y, cb1[6].x
+  46: mul r1.xzw, r0.xxwy, l(0.5000, 0.0000, 0.5000, 0.5000)
+  47: mov o5.zw, r0.zzzw
+  48: add o5.xy, r1.zzzz, r1.xwxx
+  49: mad r0.x, v5.w, l(-2.0000), l(1.0000)
+  50: mad o6.w, cb0[42].x, r0.x, v5.w
+  51: mov o6.xyz, v5.xyzx
+  52: ret
+```
+
 # 批量导出
