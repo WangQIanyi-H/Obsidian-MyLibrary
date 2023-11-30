@@ -314,8 +314,6 @@ def lookRotation(forward, up):
 但由于VP矩阵在同一帧的情况下，值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
 如下面的在DXBC源码里，VP矩阵被存到了cb2[17]、cb2[18]、cb2[19]、cb[20]。
 ```c
-Shader hash 8634519c-eed57e18-acf405ef-ee12b6fb
-
 vs_5_0
       dcl_globalFlags refactoringAllowed
       dcl_constantbuffer cb0[51], immediateIndexed
@@ -390,5 +388,28 @@ vs_5_0
   51: mov o6.xyz, v5.xyzx
   52: ret
 ```
-通常来说，这些CBuffer我们都可以在
+通常来说，这些CBuffer我们都可以在RenderDoc的Pipeline State界面的Vertex Shader下面找到。下面是用来提取CBuffer的示例代码。
+```python
+def get_constant_buffer(self, buffer_name):
+    buffer_index = -1  
+    buffer_name = buffer_name.strip()  
+    for i in range(0, len(self.shader_reflection.constantBlocks)):  
+        cb_name = self.shader_reflection.constantBlocks[i].name.strip()  
+        if cb_name == buffer_name:  
+            buffer_index = i  
+    if buffer_index == -1:  
+        print("没有找到Cbuffer")  
+        return None  
+    pipeState = self.state.GetGraphicsPipelineObject()  
+    entry = self.state.GetShaderEntryPoint(rd.ShaderStage.Vertex)  
+    cbuffer = self.state.GetConstantBuffer(rd.ShaderStage.Vertex, buffer_index, 0)  
+    cbuffer_vars = self.controller.GetCBufferVariableContents(pipeState, self.shader_reflection.resourceId,  
+                                                              rd.ShaderStage.Vertex,  
+                                                              entry, buffer_index, cbuffer.resourceId, 0, 0)  
+    cbuffer_vars_value = [] 
+    for i in cbuffer_vars:  
+        cbuffer_vars_value.append(list(i.value.f32v[0:4]))  
+    return cbuffer_vars_value
+```
+我们在拿到VP矩阵后，需要计算VP矩阵的逆，然后用positionCS乘以VP_Inv可以得到positionWS。最后用
 # 批量导出
