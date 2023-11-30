@@ -424,4 +424,5 @@ def get_constant_buffer(self, buffer_name):
 # 批量导出及导入
 经过上述操作之后，我们已经可以导出一个带有世界坐标fbx文件了。我们现在要做的，是如何批量导出这些fbx文件，还有导入Unity后对于Prefab的一系列处理。
 ## 批量导出
-想要批量导出，我们可以让用户输入
+想要批量导出，我们可以让用户输入EventID或是ActionID的起始ID和终止ID。然后通过遍历这些ID，通过ID来查找Action，找到Action后用单个模型导出的逻辑进行导出。
+在批量导出的过程中需要注意的是，
