@@ -225,10 +225,13 @@ Varyings LitPassVertex(Attributes input)
 ## 利用变换矩阵还原世界坐标
 我们现在已经知道了，VS Input中POSITION通过MVP变换（不包括NDC变换）转换到VS Output中的SV_POSITION。
 那么想要得到模型的世界空间坐标，我们可以有两种做法
-- VS Input的POSTION乘以M矩阵（模型变换矩阵）可以得到模型的世界空间坐标。
-- VS Output的SV_POSITION乘以VP矩阵（视图变换矩阵乘以投影变换矩阵的结果）的逆
+- 利用M矩阵进行
 第一种方法得到的世界空间坐标会更加准确，但缺点是M矩阵在很多情况下很难提取，并且大多数的模型的M矩阵会不一样。第二种方法得到世界空间坐标会有很小的误差（在计算逆矩阵时所导致的误差），尽管VP矩阵在一些情况下提取起来也不方便，但是优点在于在同一帧的情况下，场景中的物体所使用的的VP矩阵通常是不变的，所以此时我们可以人工找到VP矩阵的位置，以此来对世界空间的坐标进行还原。
 ### 利用M矩阵还原
+```c
+positionWS =  mul(UNITY_MATRIX_M, float4(positionOS, 1.0)).xyz
+```
+我们可以通过使用模型空间的position
 ### 利用VP矩阵还原
 
 # 批量导出
