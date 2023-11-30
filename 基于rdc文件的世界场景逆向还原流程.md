@@ -421,5 +421,7 @@ def get_constant_buffer(self, buffer_name):
     return cbuffer_vars_value
 ```
 我们在拿到VP矩阵后，需要计算VP矩阵的逆，然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
-# 批量导出
-经过上述操作之后，我们已经可以导出一个带有世界坐标
+# 批量导出及导入
+经过上述操作之后，我们已经可以导出一个带有世界坐标fbx文件了。我们现在要做的，是如何批量导出这些fbx文件，还有导入Unity后对于Prefab的一系列处理。
+## 批量导出
+
