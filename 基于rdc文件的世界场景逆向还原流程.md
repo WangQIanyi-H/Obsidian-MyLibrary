@@ -312,7 +312,7 @@ def lookRotation(forward, up):
 
 而大部分情况下，我们是很难看出VP矩阵的位置的。
 但由于VP矩阵在同一帧的情况下，值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
-如下面的DXBC源码，VP矩阵被存到了cb2[17]、cb2[18]、cb2[19]、cb[20]里。
+如下面的在DXBC源码里，VP矩阵被存到了cb2[17]、cb2[18]、cb2[19]、cb[20]。
 ```c
 Shader hash 8634519c-eed57e18-acf405ef-ee12b6fb
 
@@ -390,5 +390,5 @@ vs_5_0
   51: mov o6.xyz, v5.xyzx
   52: ret
 ```
-
+通常来说，这些CBuffer我们都可以在
 # 批量导出
