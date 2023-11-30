@@ -411,5 +411,5 @@ def get_constant_buffer(self, buffer_name):
         cbuffer_vars_value.append(list(i.value.f32v[0:4]))  
     return cbuffer_vars_value
 ```
-我们在拿到VP矩阵后，需要计算VP矩阵的逆，然后用positionCS乘以VP_Inv可以得到positionWS。最后用
+我们在拿到VP矩阵后，需要计算VP矩阵的逆，然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
 # 批量导出
