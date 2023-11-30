@@ -307,6 +307,15 @@ def lookRotation(forward, up):
     quaternion.SetAt(3, (m01 - m10) * num2)  
     return quaternion
 ```
+拿到平移旋转缩放信息后，我们可以将其写入fbx文件中，以便导入unity中时transform会带有此信息。
+```python
+def SaveAsFbx(DataFrame, saveName):  
+	...
+	newNode.LclScaling.Set(FbxDouble3(scale[0], scale[1], scale[2]))  
+	newNode.LclTranslation.Set(FbxDouble3(position[0], position[1], position[2]))  
+	newNode.LclRotation.Set(FbxDouble3(rotation[0], rotation[1], rotation[2]))
+	...
+```
 ### 利用VP矩阵还原
 同样的，在某些情况下，我们是可以截帧可以截到带有标识的VP矩阵或是VP矩阵的逆。
 
@@ -413,3 +422,4 @@ def get_constant_buffer(self, buffer_name):
 ```
 我们在拿到VP矩阵后，需要计算VP矩阵的逆，然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
 # 批量导出
+经过上述操作之后，我们已经可以导出一个带有世界坐标
