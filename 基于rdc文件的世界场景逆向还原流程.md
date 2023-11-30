@@ -234,7 +234,79 @@ Varyings LitPassVertex(Attributes input)
 ![[Pasted image 20231130150635.png]]
 此时我们可以准确定位到M矩阵所在的CBuffer位置，拿到M矩阵信息。
 但是在很多情况下，我们很难准确定位M矩阵的位置，这时就需要反编译DXBC的代码反推出M矩阵的位置，这里笔者尝试过这种做法，实现起来难度很大，且识别准确率不高，不是很推荐。
-在我们能够顺利拿到M矩阵的情况下，我们需要对M矩阵进行拆解。
+在我们能够顺利拿到M矩阵的情况下，我们就可以对M矩阵进行平移旋转缩放信息的提取。下面是提取平移旋转缩放信息的示例代码。
+```Python
+def extractPosition(matrix):  
+    position = [matrix[0, 3], matrix[1, 3], matrix[2, 3]]  
+    return position
+    
+def extractRotation(matrix):  
+    forward = [matrix[0, 2], matrix[1, 2], matrix[2, 2]]  
+    upwards = [matrix[0, 1], matrix[1, 1], matrix[2, 1]]  
+    return lookRotation(forward, upwards)
+    
+def extractScale(matrix):  
+    s1 = magnitude(matrix[0, 0], matrix[1, 0], matrix[2, 0], matrix[3, 0])  
+    s2 = magnitude(matrix[0, 1], matrix[1, 1], matrix[2, 1], matrix[3, 1])  
+    s3 = magnitude(matrix[0, 2], matrix[1, 2], matrix[2, 2], matrix[3, 2])  
+    return scale
+
+def magnitude(e, b, c, d):  
+    e = e * e  
+    b = b * b  
+    c = c * c  
+    d = d * d  
+    s = e + b + c + d  
+    return math.sqrt(s)
+
+def lookRotation(forward, up):  
+    forward = normalize(forward)  
+    vector = normalize(forward)  
+    vector2 = normalize(np.cross(up, vector))  
+    vector3 = np.cross(vector, vector2)  
+    m00 = vector2[0]  
+    m01 = vector2[1]  
+    m02 = vector2[2]  
+    m10 = vector3[0]  
+    m11 = vector3[1]  
+    m12 = vector3[2]  
+    m20 = vector[0]  
+    m21 = vector[1]  
+    m22 = vector[2]  
+    num8 = (m00 + m11) + m22  
+    quaternion = FbxQuaternion(0.0, 0.0, 0.0, 1)  
+    if num8 > 0:  
+        num = float(math.sqrt(num8 + 1.0))  
+        quaternion.SetAt(3, num * 0.5)  
+        num = 0.5 / num  
+        quaternion.SetAt(0, (m12 - m21) * num)  
+        quaternion.SetAt(1, (m20 - m02) * num)  
+        quaternion.SetAt(2, (m01 - m10) * num)  
+        return quaternion  
+    if (m00 >= m11) and (m00 >= m22):  
+        num7 = float(math.sqrt(((1.0 + m00) - m11) - m22))  
+        num4 = 0.5 / num7  
+        quaternion.SetAt(0, 0.5 * num7)  
+        quaternion.SetAt(1, (m01 + m10) * num4)  
+        quaternion.SetAt(2, (m02 + m20) * num4)  
+        quaternion.SetAt(3, (m12 - m21) * num4)  
+        return quaternion  
+    if m11 > m22:  
+        num6 = float(math.sqrt(((1.0 + m11) - m00) - m22))  
+        num3 = 0.5 / num6  
+        quaternion.SetAt(0, (m10 + m01) * num3)  
+        quaternion.SetAt(1, 0.5 * num6)  
+        quaternion.SetAt(2, (m21 + m12) * num3)  
+        quaternion.SetAt(3, (m20 - m02) * num3)  
+        return quaternion  
+    num5 = float(math.sqrt(((1.0 + m22) - m00) - m11))  
+    num2 = 0.5 / num5  
+    quaternion.SetAt(0, (m20 + m02) * num2)  
+    quaternion.SetAt(1, (m21 + m12) * num2)  
+    quaternion.SetAt(2, 0.5 * num5)  
+    quaternion.SetAt(3, (m01 - m10) * num2)  
+    return quaternion
+```
 ### 利用VP矩阵还原
 
 # 批量导出
