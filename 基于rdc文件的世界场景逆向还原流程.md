@@ -1,10 +1,8 @@
 本文将介绍，在使用RenderDoc软件在游戏中进行截帧后，该如何利用rdc文件，来导出带有世界坐标的模型，从而还原游戏场景。
 本篇文章将从以下几个方面对该流程进行阐述
-- 如何导出单个模型：使用renderdoc的python接口、fbxsdk对单个drawcall的mesh进行导出，在此处创建材质，匹配贴图，介绍导出贴图的一些坑（renderdoc版本，python版本）
+- 如何导出单个模型：介绍了如何提取Mesh信息、如何生成fbx文件以及贴图导出的内容
 - 找到变换矩阵：通过找到vp矩阵或者vp矩阵的逆，将模型从local space转换到world space，或是从Clip Space转到World Space（在转换过程中会有误差）
 - 进行批量导出：该如何进行批量导出，批量导出时需要注意到的一些坑
-- 导入Unity中并生成Prefab，对场景进行还原：将模型导入Unity后，将如何批量生成Prefab及其lod，并且采用Prefab的实例化方式来代替一个个的模型
-
 # 单个模型导出
 我们可以在RenderDoc的Mesh Viewer界面看到模型的相关信息，并根据这些信息导出fbx模型文件。
 同时，在Texture View界面我们可以看到输入的贴图信息，我们需要将其导出成tga格式。
@@ -400,9 +398,7 @@ def get_constant_buffer(self, buffer_name):
     return cbuffer_vars_value
 ```
 在拿到VP矩阵后，还需要计算VP矩阵的逆。然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
-# 批量导出及导入
-经过上述操作之后，我们已经可以导出一个带有世界坐标fbx文件了。我们现在要做的，是如何批量导出这些fbx文件，还有导入Unity后对于Prefab的一系列处理。
-## 批量导出
-想要批量导出，我们可以让用户输入EventID或是ActionID的起始ID和终止ID。然后通过遍历这些ID，通过ID来查找Action，找到Action后用单个模型导出的逻辑进行导出。
+# 批量导出
+批量导出的话，我们可以让用户输入EventID或是ActionID的起始ID和终止ID。然后通过遍历这些ID，通过ID来查找Action，找到Action后用单个模型导出的逻辑进行导出。
 在批量导出的过程中需要注意的是，在DX11或DX12平台下截的帧，需要对使用DrawIndexedInstanced和DrawIndexInstancedIndirect的Action进行特殊处理，因为这两者都在一个Action（或者说是DrawCall）下画了多个不同位置的同一个mesh，也就是说，他们的mesh信息相同，但是平移旋转缩放信息可能不同。
 在使用M矩阵进行还原时，就要注意这一个Action下就会要用到多个不同的M矩阵（提取的时候会很麻烦）。在使用VP矩阵进行还原时，会发现RenderDoc提供了各个不同Instance的VS Output的信息，通过RenderDoc提供的API进行获取即可。
