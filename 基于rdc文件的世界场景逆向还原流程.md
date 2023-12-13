@@ -210,9 +210,9 @@ Varyings LitPassVertex(Attributes input)
 ### 利用M矩阵还原
 在某些情况下，我们截帧是可以截到带有标识的M矩阵的，如下图所示。
 ![[Pasted image 20231130150635.png]]
-此时我们可以准确定位到M矩阵所在的CBuffer位置，拿到M矩阵信息。
-但是在很多情况下，我们很难准确定位M矩阵的位置，这时就需要反编译DXBC的代码反推出M矩阵的位置，这里笔者尝试过这种做法，实现起来难度很大，且识别准确率不高，不是很推荐。
-在我们能够顺利拿到M矩阵的情况下，我们就可以对M矩阵进行平移旋转缩放信息的提取。下面是提取平移旋转缩放信息的示例代码。
+此时可以准确定位到M矩阵所在的CBuffer位置，拿到M矩阵信息。
+但是在很多情况下，我们很难准确定位M矩阵的位置，这时就需要反编译DXBC的代码反推出M矩阵的位置，在这里我尝试过这种做法，实现起来难度很大，且识别准确率不高，不是很推荐。
+在能够顺利拿到M矩阵的情况下，就可以对M矩阵进行平移旋转缩放信息的提取。下面是提取平移旋转缩放信息的示例代码。
 ```Python
 def extractPosition(matrix):  
     position = [matrix[0, 3], matrix[1, 3], matrix[2, 3]]  
@@ -295,10 +295,10 @@ def SaveAsFbx(DataFrame, saveName):
 	...
 ```
 ### 利用VP矩阵还原
-同样的，在某些情况下，我们是可以截帧可以截到带有标识的VP矩阵或是VP矩阵的逆。
+同样的，在某些情况下，我们是可以截帧可以截到带有标识的VP矩阵或是VP矩阵的逆。如下图所示。
 
 而大部分情况下，我们是很难看出VP矩阵的位置的。
-但由于VP矩阵在同一帧的情况下，值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
+但是呢，由于VP矩阵在同一帧的情况下（或者说在一个rdc文件内），矩阵的值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
 如下面的在DXBC源码里，VP矩阵被存到了cb2[17]、cb2[18]、cb2[19]、cb[20]。
 ```c
 vs_5_0
@@ -375,7 +375,8 @@ vs_5_0
   51: mov o6.xyz, v5.xyzx
   52: ret
 ```
-通常来说，这些CBuffer我们都可以在RenderDoc的Pipeline State界面的Vertex Shader下面找到。下面是用来提取CBuffer的示例代码。
+通常来说，存储这些矩阵的CBuffer都是可以在RenderDoc的Pipeline State界面的Vertex Shader下面找到。
+在定位好CBuffer的位置后，可以用代码在CBuffer中提取矩阵信息。下面是用来提取CBuffer的示例代码。
 ```python
 def get_constant_buffer(self, buffer_name):
     buffer_index = -1  
@@ -398,19 +399,10 @@ def get_constant_buffer(self, buffer_name):
         cbuffer_vars_value.append(list(i.value.f32v[0:4]))  
     return cbuffer_vars_value
 ```
-我们在拿到VP矩阵后，需要计算VP矩阵的逆，然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
+在拿到VP矩阵后，还需要计算VP矩阵的逆。然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
 # 批量导出及导入
 经过上述操作之后，我们已经可以导出一个带有世界坐标fbx文件了。我们现在要做的，是如何批量导出这些fbx文件，还有导入Unity后对于Prefab的一系列处理。
 ## 批量导出
 想要批量导出，我们可以让用户输入EventID或是ActionID的起始ID和终止ID。然后通过遍历这些ID，通过ID来查找Action，找到Action后用单个模型导出的逻辑进行导出。
 在批量导出的过程中需要注意的是，在DX11或DX12平台下截的帧，需要对使用DrawIndexedInstanced和DrawIndexInstancedIndirect的Action进行特殊处理，因为这两者都在一个Action（或者说是DrawCall）下画了多个不同位置的同一个mesh，也就是说，他们的mesh信息相同，但是平移旋转缩放信息可能不同。
 在使用M矩阵进行还原时，就要注意这一个Action下就会要用到多个不同的M矩阵（提取的时候会很麻烦）。在使用VP矩阵进行还原时，会发现RenderDoc提供了各个不同Instance的VS Output的信息，通过RenderDoc提供的API进行获取即可。
-## 导入Unity
-在对模型和贴图进行导出后，我们需要将这些资源导入到Unity中进行场景的搭建。
-
-贴图在导入Unity时需要勾掉sRGB颜色才正确。
-需要上下翻转贴图才能对上模型UV(要么转贴图要么翻UV)。
-
-材质生成及替换
-
-Prefab生成及LOD补充
