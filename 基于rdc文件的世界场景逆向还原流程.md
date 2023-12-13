@@ -6,35 +6,12 @@
 - 导入Unity中并生成Prefab，对场景进行还原：将模型导入Unity后，将如何批量生成Prefab及其lod，并且采用Prefab的实例化方式来代替一个个的模型
 
 # 单个模型导出
-想要还原整个世界场景，首先要从导出单个模型开始。
-我们需要先选择我们想要导出的那个模型被绘制的那个Action。
-官方文档有给出对Action Tree进行遍历的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/iter_actions.html)，可以参考示例代码找到特定的Action。
-找到特定的Action后，我们就可以导出模型信息了。
-我们可以在Mesh Viewer界面看到模型的相关信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。
-![[Pasted image 20231128154333.png]]
-
-> [!NOTE] Event
-> 在RenderDoc中，事件（Event）指的是各种图形API的调用。这些事件可以包括 
-> 1. **绘制调用**（Draw Calls）：这些是图形应用程序中最常见的事件之一，涉及到将几何数据（如顶点）送入图形管线进行渲染。
-> 2. **资源操作**：包括创建、修改、删除纹理、缓冲区等图形资源的事件。
-> 3. **分发计算调用**：在使用计算着色器时执行的调用，这些着色器不直接涉及渲染，而是用于各种计算任务。
-> 4. **内存操作**：例如复制或更新缓冲区或纹理的内容。
-> 在RenderDoc中，可以通过Event Browser来查看这些事件。它允许用户逐一检查每个事件。
-
-> [!NOTE] Action
-> 在RenderDoc中，“Action"是指引发GPU执行工作或影响内存及资源（如纹理和缓存区）的具体调用或事件。这些动作通常包括但不限于以下几种：
-> 1. **绘制调用**（Draw Calls）：这是最常见的动作类型，涉及将几何数据（例如顶点和索引）发送到GPU进行渲染处理。
-> 2. **分发调用**（Dispatch Calls）：这些是计算着色器的调用，它们不是直接进行图形渲染，而是执行例如数据处理等计算任务。
-> 3. **清除操作**（Clears）：清除特定图形资源，如帧缓冲、纹理或深度缓冲区。
-> 4. **清除操作**（Clears）：清除特定图形资源，如帧缓冲、纹理或深度缓冲区。
-> 5. **解析操作**（Resolves）：涉及多采样纹理的处理，如将多采样帧缓冲区解析为单采样纹理
-> 在RenderDoc中，Action一定是Event，Event并不一定是Aciton。
+我们可以在RenderDoc的Mesh Viewer界面看到模型的相关信息。如下图所示，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。
 
 ## 提取模型信息
 RenderDoc提供了相应的接口让我们可以拿到VS Input和VS output中的数据。官方文档中也有关于解析Mesh数据的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)可以参考。
-## 提取贴图信息
 ## 生成FBX文件
-光有Mesh的数据还不够，我们还需要将这些数据转换成fbx的格式。
+参考官方文档可
 我们可以使用FBX SDK来创建FBX文件。下面是根据Mesh信息创建fbx文件的示例。
 ```Python
 def SaveAsFbx(DataFrame, saveName):  
