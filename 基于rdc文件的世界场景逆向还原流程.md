@@ -297,9 +297,9 @@ def SaveAsFbx(DataFrame, saveName):
 ```
 ### 利用VP矩阵还原
 同样的，在某些情况下，我们是可以截帧可以截到带有标识的VP矩阵或是VP矩阵的逆。如下图所示。
-
-而大部分情况下，我们是很难看出VP矩阵的位置的。
-但是呢，由于VP矩阵在同一帧的情况下（或者说在一个rdc文件内），矩阵的值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
+![[Pasted image 20231214113628.png]]
+而大部分情况下呢，我们是很难直接找到VP矩阵的位置的。
+但由于VP矩阵在同一帧的情况下（或者说在一个rdc文件内），矩阵的值通常是相等的，所以这时我们可以通过阅读DXBC源码，判断VP矩阵所存的CBuffer位置。
 如下面的在DXBC源码里，VP矩阵被存到了cb2[17]、cb2[18]、cb2[19]、cb[20]。
 ```c
 vs_5_0
@@ -325,11 +325,11 @@ vs_5_0
    0: mul r0.xyzw, v0.yyyy, cb2[1].xyzw
    1: mad r0.xyzw, cb2[0].xyzw, v0.xxxx, r0.xyzw
    2: mad r0.xyzw, cb2[2].xyzw, v0.zzzz, r0.xyzw
-   3: add r0.xyzw, r0.xyzw, cb2[3].xyzw
+   3: add r0.xyzw, r0.xyzw, cb2[3].xyzw//这里是乘以M矩阵，模型空间到世界空间的变换
    4: mul r1.xyzw, r0.yyyy, cb3[18].xyzw
    5: mad r1.xyzw, cb3[17].xyzw, r0.xxxx, r1.xyzw
    6: mad r1.xyzw, cb3[19].xyzw, r0.zzzz, r1.xyzw
-   7: mad r0.xyzw, cb3[20].xyzw, r0.wwww, r1.xyzw
+   7: mad r0.xyzw, cb3[20].xyzw, r0.wwww, r1.xyzw//乘以VP矩阵，世界空间到裁剪空间的变换
    8: mov o0.xyzw, r0.xyzw
    9: eq r1.x, cb0[49].y, l(0)
   10: movc r1.xy, r1.xxxx, v3.xyxx, v4.xyxx
@@ -377,7 +377,7 @@ vs_5_0
   52: ret
 ```
 通常来说，存储这些矩阵的CBuffer都是可以在RenderDoc的Pipeline State界面的Vertex Shader下面找到。
-在定位好CBuffer的位置后，可以用代码在CBuffer中提取矩阵信息。下面是用来提取CBuffer的示例代码。
+在定位好CBuffer的位置后，可以是用RenderDoc提供的API在CBuffer中提取矩阵信息。下面是用来提取CBuffer的示例代码。
 ```python
 def get_constant_buffer(self, buffer_name):
     buffer_index = -1  
@@ -400,7 +400,7 @@ def get_constant_buffer(self, buffer_name):
         cbuffer_vars_value.append(list(i.value.f32v[0:4]))  
     return cbuffer_vars_value
 ```
-在拿到VP矩阵后，还需要计算VP矩阵的逆。然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值。
+在拿到VP矩阵后，还需要计算VP矩阵的逆。然后用positionCS乘以VP矩阵的逆可以得到positionWS。最后用positionWS乘以positionOS的逆可以得到M矩阵，从而可以计算出平移缩放旋转值（上一小节有介绍）。
 # 批量导出
 批量导出的话，我们可以让用户输入EventID或是ActionID的起始ID和终止ID。然后通过遍历这些ID，通过ID来查找Action，找到Action后用单个模型导出的逻辑进行导出。
 在批量导出的过程中需要注意的是，在DX11或DX12平台下截的帧，需要对使用DrawIndexedInstanced和DrawIndexInstancedIndirect的Action进行特殊处理，因为这两者都在一个Action（或者说是DrawCall）下画了多个不同位置的同一个mesh，也就是说，他们的mesh信息相同，但是平移旋转缩放信息可能不同。
