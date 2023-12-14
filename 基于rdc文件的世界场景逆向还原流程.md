@@ -1,16 +1,18 @@
 本文将介绍，在使用RenderDoc软件在游戏中进行截帧后，该如何利用rdc文件，来导出带有世界坐标的模型，从而还原游戏场景。
-本篇文章将从以下几个方面对该流程进行阐述
+本文将从以下几个方面对该流程进行阐述：
 - 如何导出单个模型：介绍了如何提取Mesh信息、如何生成fbx文件以及贴图导出的内容
 - 找到变换矩阵：通过找到vp矩阵或者vp矩阵的逆，将模型从local space转换到world space，或是从Clip Space转到World Space（在转换过程中会有误差）
 - 进行批量导出：该如何进行批量导出，批量导出时需要注意到的一些坑
 # 单个模型导出
-我们可以在RenderDoc的Mesh Viewer界面看到模型的相关信息，并根据这些信息导出fbx模型文件。
-同时，在Texture View界面我们可以看到输入的贴图信息，我们需要将其导出成tga格式。
+在RenderDoc的Mesh Viewer界面中，可以看到网格的相关信息，根据这些信息可以生成并导出fbx模型文件。
+同时，在Texture View界面可以看到输入的贴图信息，我们需要将其批量导出成tga格式。
 ## 提取Mesh信息
+在RenderDoc的Mesh Viewer界面中，可以发现有VS Input和VS output两组信息（可能某些地方不叫这个名字，但是大致形式差不多），如下图所示。
+![[Pasted image 20231214111638.png]]
 RenderDoc提供了相应的接口让我们可以拿到VS Input和VS output中的数据，其中，VS Input指的是输入进顶点着色器的模型信息，VS Output指的是经过MVP变换之后的模型信息。关于mesh信息的导出可以参考官方文档中的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)。
 ## 生成FBX文件
 参考官方文档的[示例代码](https://renderdoc.org/docs/python_api/examples/renderdoc/decode_mesh.html)可以获取mesh信息。
-获取了mesh信息之后，我们可以使用FBX SDK来创建FBX文件。下面是根据Mesh信息创建fbx文件的示例。
+在获取了mesh信息之后，我们可以使用FBX SDK来创建FBX文件（想要了解FBX文件结构可以参考[这篇文章](https://zhuanlan.zhihu.com/p/657784007)）。下面是根据Mesh信息创建fbx文件的代码示例。
 ```Python
 def SaveAsFbx(DataFrame, saveName):  
     fbxName = os.path.basename(saveName).split(".")[0]  
@@ -139,7 +141,7 @@ def SaveAsFbx(DataFrame, saveName):
 在贴图命名正确的情况下，可以根据命名规律找出Diffuse、Normal等贴图。然后导出模型时通过FBX SDK来创建模型材质来绑定这些贴图，这样子在后续模型进入Unity后，模型会自动关联到这些贴图，而不至于是白模。（在Unreal引擎做的游戏所截的帧中得到的rdc文件，通常贴图没有一个可识别的命名，这种就无能为力了）
 # 世界坐标还原
 单个Local Space的模型导出是简单的，但是想要还原整个世界场景，还需做进一步处理。
-还原整个世界空间，就需要将模型空间坐标或是屏幕空间坐标还原到世界空间。在此之前，我们首先需要简单了解一下MVP变换。
+想要还原世界坐标，就需要将模型空间坐标或是屏幕空间坐标转换到世界空间。在进行转换之前，我们先简单了解一下MVP变换。
 ## MVP变换介绍
 在图形流水线中，MVP变换指的是一系列坐标空间变换，这些转换通过将模型变换（Model Transform）、视图变换（View Transform）和投影变换（Projection Transform）相结合来实现。这三种变换共同组成了MVP变换，它们将3D场景中的对象转换到一个二维图像上，以便在屏幕上渲染。下面详细介绍每个组成部分：
 ### 模型变换（Model Transform）
@@ -196,7 +198,7 @@ Varyings LitPassVertex(Attributes input)
 	return output;
 }
 ```
-不难发现，输入到顶点着色器的位置坐标POSITION是处于模型空间，对应的是变量positionOS，但是在Lit中，尽管对于世界空间、视图空间、裁剪空间、NDC空间的坐标都有计算，但是最后输出到SV_POSITION的是裁剪空间坐标positionCS。
+不难发现，输入到顶点着色器（VS Input）的位置坐标POSITION是处于模型空间，对应的是变量positionOS，但是在Lit中，尽管对于世界空间、视图空间、裁剪空间、NDC空间的坐标都有计算，但是最后输出到SV_POSITION的是裁剪空间坐标positionCS。
 所以，RenderDoc中的VS Input通常代表的是模型空间下的Mesh信息，VS Output通常代表的是裁剪空间下的Mesh信息。
 ## 利用变换矩阵还原世界坐标
 现在我们已经知道了，VS Input中POSITION通过MVP变换（不包括NDC变换）可以得到VS Output中的SV_POSITION。
